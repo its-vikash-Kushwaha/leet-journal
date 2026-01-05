@@ -1,13 +1,9 @@
 spring:
   application:
-    name: batch-service
-  sql:
-    init:
-      mode: always
+    name: problems-service
   datasource:
     url: jdbc:postgresql://SUPER-BUSH
     username: owner
     password: DONTSTEALMYPASS
-#  batch:
-#    jdbc:
-#      initialize-schema: "always"
+server:
+  port: 8000

@@ -5,6 +5,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/batch-service/pom.xml" />
+        <option value="$PROJECT_DIR$/problems-service/pom.xml" />
       </list>
     </option>
   </component>
