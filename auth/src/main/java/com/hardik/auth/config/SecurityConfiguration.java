@@ -24,7 +24,8 @@ class SecurityConfiguration {
                         .requestMatchers("/", "/register").permitAll()
                         .requestMatchers("/login").permitAll()
                         .anyRequest().authenticated())
-                .formLogin(withDefaults());
+                .formLogin(withDefaults())
+                .httpBasic(withDefaults());
         return http.build();
     }
 
@@ -37,4 +38,5 @@ class SecurityConfiguration {
     JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
         return new JdbcUserDetailsManager(dataSource);
     }
+
 }

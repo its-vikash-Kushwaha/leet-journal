@@ -1,8 +1,8 @@
 package com.hardik.auth;
 
-import com.hardik.auth.repository.AuthRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,12 +15,10 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetails {
 
     private final PasswordEncoder passwordEncoder;
-    private final AuthRepository authRepository;
     private final JdbcUserDetailsManager jdbcUserDetailsManager;
 
-    CustomUserDetails(PasswordEncoder passwordEncoder, AuthRepository authRepository, JdbcUserDetailsManager jdbcUserDetailsManager) {
+    CustomUserDetails(PasswordEncoder passwordEncoder, JdbcUserDetailsManager jdbcUserDetailsManager) {
         this.passwordEncoder = passwordEncoder;
-        this.authRepository = authRepository;
         this.jdbcUserDetailsManager = jdbcUserDetailsManager;
     }
 
@@ -29,7 +27,7 @@ public class CustomUserDetails {
         boolean existingUser = jdbcUserDetailsManager.userExists(username);
         IO.println("User: " + existingUser);
         if(existingUser) {
-            return ResponseEntity.ofNullable("User already exists");
+            return ResponseEntity.badRequest().body("User already exists");
         }
 
         UserDetails user = User.builder()
@@ -40,15 +38,14 @@ public class CustomUserDetails {
 
         jdbcUserDetailsManager.createUser(user);
 
-        var newContext = SecurityContextHolder.createEmptyContext();
-        newContext
-                .setAuthentication(
-                        new UsernamePasswordAuthenticationToken(
-                                username, passwordEncoder.encode(password)
-                        )
-                );
+
+        SecurityContext newContext;
+        newContext = SecurityContextHolder.createEmptyContext();
+        newContext.setAuthentication(new UsernamePasswordAuthenticationToken(
+                username, password, user.getAuthorities()
+        ));
         SecurityContextHolder.setContext(newContext);
 
-        return ResponseEntity.ok(user.getUsername());
+        return ResponseEntity.ok(user.getUsername() + " you can proceed to login now!");
     }
 }

@@ -1,7 +1,5 @@
 package com.hardik.auth;
 
-import com.hardik.auth.repository.AuthRepository;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationListener;
@@ -16,7 +14,7 @@ public class AuthApplication {
     }
 
     @Bean
-    ApplicationListener<AuthenticationSuccessEvent> authSuccess(AuthRepository authRepository) {
+    ApplicationListener<AuthenticationSuccessEvent> authSuccess() {
         return (auth) -> {
             var res = auth.getAuthentication();
             IO.println("Logged in as: " + res.getName() + " Type: "  + res.getClass().getSimpleName());
