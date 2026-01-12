@@ -2,11 +2,8 @@ package com.hardik.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authorization.EnableMultiFactorAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -18,22 +15,30 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-@EnableMultiFactorAuthentication(authorities = {
-        FactorGrantedAuthority.PASSWORD_AUTHORITY,
-        FactorGrantedAuthority.OTT_AUTHORITY
-})
 class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .oauth2AuthorizationServer(as -> as.oidc(withDefaults()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/register").permitAll()
                         .requestMatchers("/login").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(withDefaults())
-                .oneTimeTokenLogin(withDefaults());
+                .webAuthn(a -> a
+                        .rpId("localhost")
+                        .rpName("leet")
+                        .allowedOrigins("http://localhost:8002")
+                )
+                .oneTimeTokenLogin(ott -> ott
+                        .tokenGenerationSuccessHandler((_, response, oneTimeToken) -> {
+
+                            response.getWriter().println("mail!!!!!!!!!!!!!1");
+
+                            IO.println("http://localhost:8002/login/ott?token=" + oneTimeToken.getTokenValue());
+                        }));
+
         return http.build();
     }
 
