@@ -2,7 +2,7 @@ package com.hardik.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -28,12 +28,11 @@ class AuthSecurityConfiguration {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .oauth2AuthorizationServer(as -> as.oidc(withDefaults()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/register").permitAll()
                         .requestMatchers("/login").permitAll()
                         .anyRequest().authenticated())
-                .formLogin(withDefaults());
+                .formLogin(withDefaults())
+                .oauth2AuthorizationServer(as -> as.oidc(withDefaults()));
 
         return http.build();
     }
@@ -49,26 +48,21 @@ class AuthSecurityConfiguration {
     }
 
     @Bean
-    RegisteredClientRepository registeredClientRepository(JdbcOperations jdbcOperations) {
+    RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+        JdbcRegisteredClientRepository jdbcRegisteredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
 
-        JdbcRegisteredClientRepository jdbcRegisteredClientRepository = new JdbcRegisteredClientRepository(jdbcOperations);
+        // I hate this shit. its not supposed to be this hard!!
 
         RegisteredClient registeredClient = RegisteredClient
-                .withId("gateway-client")
-                .clientId("gateway")
-                .clientSecret(passwordEncoder().encode("secret"))
+                .withId("client-id")
+                .clientName("client-name")
+                .clientSecret("{noop}secret")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8000/login/oauth2/code/gateway")
-                .scope("openid")
-                .scope("problems.read")
+                .scope("user")
                 .build();
 
-        if (jdbcRegisteredClientRepository.findByClientId("gateway") == null) {
-            jdbcRegisteredClientRepository.save(registeredClient);
-        }
-
+        jdbcRegisteredClientRepository.save(registeredClient);
         return jdbcRegisteredClientRepository;
     }
 
