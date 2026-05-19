@@ -9,6 +9,14 @@ Thank you for your interest in contributing to Leet Journal!
 - Beginners are encouraged to start with documentation or small fixes.
 - Do not spam issues or request assignment for issues that are already assigned to someone else.
 
+### How to contribute
+
+1. Fork the repository.
+2. Create a feature branch from `master`.
+3. Make the smallest focused change that solves the problem.
+4. Run the relevant service tests before opening a pull request.
+5. Open a pull request with a clear description of the change and any setup or verification steps.
+
 ## Contribution Workflow
 
 1. Fork the repository
