@@ -22,4 +22,9 @@ public class ProblemService {
         return problemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Problem not found!"));
     }
+
+    public Problem findProblemByTitle(String title){
+        return problemRepository.findByTitle(title)
+                .orElseThrow(() -> new IllegalArgumentException("Problem not found!"));
+    }
 }
